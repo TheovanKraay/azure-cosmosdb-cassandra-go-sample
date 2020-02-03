@@ -9,9 +9,12 @@ import (
 
 func main() {
 	// connect to the cluster
-	cluster := gocql.NewCluster("")
+	cluster := gocql.NewCluster("ACCOUNTNAME.cassandra.cosmos.azure.com")
 	cluster.Port = 10350
-	cluster.Authenticator = gocql.PasswordAuthenticator{Username: "", Password: ""}
+	var sslOptions = new(gocql.SslOptions)
+	sslOptions.EnableHostVerification = false
+	cluster.SslOpts = sslOptions
+	cluster.Authenticator = gocql.PasswordAuthenticator{Username: "ACCOUNTNAME", Password: ""}
 	session, _ := cluster.CreateSession()
 	defer session.Close()
 
@@ -21,7 +24,7 @@ func main() {
 	}
 
 	// Create Table
-	if err := session.Query(`CREATE TABLE kspc1.tbl1 (pk int, ck int, col1 text, col2 bigint, PRIMARY KEY (pk, ck));`).Exec(); err != nil {
+	if err := session.Query(`CREATE TABLE IF NOT EXISTS kspc1.tbl1 (pk int, ck int, col1 text, col2 bigint, PRIMARY KEY (pk, ck));`).Exec(); err != nil {
 		log.Fatal(err)
 	}
 
