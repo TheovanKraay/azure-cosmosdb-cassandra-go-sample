@@ -1,6 +1,7 @@
 package main
 
 import (
+	"crypto/tls"
 	"fmt"
 	"log"
 
@@ -12,13 +13,16 @@ func main() {
 	cluster := gocql.NewCluster("ACCOUNTNAME.cassandra.cosmos.azure.com")
 	cluster.Port = 10350
 	var sslOptions = new(gocql.SslOptions)
-	// Set tihs to false to disable client-side server cert verification.
+
+	// If you want to enable client-side SSL server cert verification do this. If not, set sslOptions.EnableHostVerification to false and ignore the other options.
 	sslOptions.EnableHostVerification = true
-	sslOptions.CaPath = "path/to/.pem"
-	// sslOptions.ServerName = `endpoint` // This should fix client side ssl verification, TODO: figure out how to do this right.
+	sslOptions.CaPath = "path/to/cert.pem"
+	sslOptions.Config = &tls.Config{}
+	sslOptions.ServerName = `ACCOUNTNAME.cassandra.cosmos.azure.com`
 	cluster.SslOpts = sslOptions
+
 	cluster.ProtoVersion = 4
-	cluster.Authenticator = gocql.PasswordAuthenticator{Username: "ACCOUNTNAME", Password: "pwd"}
+	cluster.Authenticator = gocql.PasswordAuthenticator{Username: "ACCOUNTNAME", Password: "PWD"}
 	session, _ := cluster.CreateSession()
 	defer session.Close()
 
